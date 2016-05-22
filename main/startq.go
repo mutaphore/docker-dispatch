@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/mutaphore/rabbitmq-queue/utils"
+	"github.com/mutaphore/docker-dispatch/utils"
 	"github.com/streadway/amqp"
 )
 
 func main() {
+	if len(os.Args) != 2 {
+		log.Println("Invalid number of arguments: startq qname")
+		os.Exit(1)
+	}
+	qName := os.Args[1]
+
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	utils.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -16,7 +22,7 @@ func main() {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"hello",
+		qName,
 		false,
 		false,
 		false,

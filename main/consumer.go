@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mutaphore/rabbitmq-queue/utils"
+	"github.com/mutaphore/docker-dispatch/utils"
 	"github.com/streadway/amqp"
 	"log"
 	"os"
