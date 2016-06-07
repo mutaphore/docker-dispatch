@@ -1,10 +1,5 @@
 package docker
 
-const (
-	TransportTCP    = "tcp"
-	TransportSocket = "socket"
-)
-
 type DockerImage struct {
 	Id          string
 	ParentId    string
@@ -18,3 +13,5 @@ type DockerImage struct {
 
 type DockerContainer struct {
 }
+
+type DockerInfo map[string]interface{}
