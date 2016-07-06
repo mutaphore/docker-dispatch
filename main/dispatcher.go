@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/mutaphore/docker-dispatch/docker"
-	// "net/url"
+	"net/url"
 	"os"
-	// "strings"
+	"strings"
 )
 
 var (
@@ -22,7 +22,7 @@ func setupFlags() {
 func usage() {
 	flag.Usage()
 	// Host address should be somthing like "172.17.0.1:2375" or "/var/run/docker.sock"
-	fmt.Println("docker-dispatch [options] Docker-Host")
+	fmt.Println("docker-dispatch [options] DockerHostAddr RabbitQueueAddr")
 }
 
 func checkURL(urlStr string) (*url.URL, error) {

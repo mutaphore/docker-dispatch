@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"log"
-	"bytes"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 
 type Logger struct {
 	logLevel string
-	logger  *log.Logger
+	logger   *log.Logger
 }
 
 func NewLogger(logLevel string) *Logger {
@@ -31,7 +31,7 @@ func NewLogger(logLevel string) *Logger {
 	var buf bytes.Buffer
 	return &Logger{
 		logLevel: logLevel,
-		logger: log.New(&buf, "logger: ", nil)
+		logger:   log.New(&buf, "logger: ", log.Ldate|log.Ltime),
 	}
 }
 

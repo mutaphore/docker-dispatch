@@ -2,7 +2,7 @@ package docker
 
 import (
 	"encoding/json"
-	"github.com/mutaphore/docker-dispatch/utils"
+	// "github.com/mutaphore/docker-dispatch/utils"
 	"io/ioutil"
 	"log"
 	"net"
