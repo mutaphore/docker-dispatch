@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/mutaphore/docker-dispatch/utils"
 	"github.com/streadway/amqp"
+	"log"
+	"os"
 )
 
 func main() {

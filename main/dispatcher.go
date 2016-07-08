@@ -19,10 +19,11 @@ func setupFlags() {
 }
 
 // Print command line usage
+// Docker host address should have format like 172.17.0.1:2375 for tcp or /var/run/docker.sock for socket
+// Rabbit queue address should be like amqp://guest:guest@localhost:5672/
 func usage() {
 	flag.Usage()
-	// Host address should be somthing like "172.17.0.1:2375" or "/var/run/docker.sock"
-	fmt.Println("docker-dispatch [options] DockerHostAddr RabbitQueueAddr")
+	fmt.Println("docker-dispatch [options] DockerHostAddr AMPQAddr")
 }
 
 func checkURL(urlStr string) (*url.URL, error) {
@@ -38,7 +39,7 @@ func checkURL(urlStr string) (*url.URL, error) {
 }
 
 func checkArgs(args []string) {
-	if len(args) < 2 {
+	if len(args) != 2 {
 		usage()
 		os.Exit(1)
 	}
@@ -46,10 +47,13 @@ func checkArgs(args []string) {
 
 func main() {
 	setupFlags()
-	checkArgs(os.Args)
+	args := flag.Args()
+	checkArgs(args)
 
-	hostAddr := os.Args[len(os.Args)-1]
+	hostAddr := args[0]
 	dclient := docker.NewDockerClient(hostAddr)
+
+	q := make(chan )
 
 	images := dclient.GetImages()
 	fmt.Printf("Number of images %d\n", len(images))
