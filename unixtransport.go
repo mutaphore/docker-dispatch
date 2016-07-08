@@ -1,4 +1,4 @@
-package docker
+package dockerdispatch
 
 import (
 	"net"

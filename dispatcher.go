@@ -1,9 +1,8 @@
-package main
+package dockerdispatch
 
 import (
 	"flag"
 	"fmt"
-	"github.com/mutaphore/docker-dispatch/docker"
 	"net/url"
 	"os"
 	"strings"
@@ -51,9 +50,7 @@ func main() {
 	checkArgs(args)
 
 	hostAddr := args[0]
-	dclient := docker.NewDockerClient(hostAddr)
-
-	q := make(chan )
+	dclient := NewDockerClient(hostAddr)
 
 	images := dclient.GetImages()
 	fmt.Printf("Number of images %d\n", len(images))

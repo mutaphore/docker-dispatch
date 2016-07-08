@@ -1,8 +1,7 @@
-package docker
+package dockerdispatch
 
 import (
 	"encoding/json"
-	// "github.com/mutaphore/docker-dispatch/utils"
 	"io/ioutil"
 	"log"
 	"net"

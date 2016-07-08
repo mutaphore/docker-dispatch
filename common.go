@@ -1,4 +1,4 @@
-package docker
+package dockerdispatch
 
 type DockerImage struct {
 	Id          string

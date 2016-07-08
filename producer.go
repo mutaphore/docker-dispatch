@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/mutaphore/docker-dispatch/utils"
 	"github.com/streadway/amqp"
 	"log"
 	"os"
@@ -15,11 +14,11 @@ func main() {
 	qName := os.Args[1]
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	utils.FailOnError(err, "Failed to connect to RabbitMQ")
+	FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	utils.FailOnError(err, "Failed to open a channel")
+	FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
 	body := "Hello world"
@@ -32,5 +31,5 @@ func main() {
 			ContentType: "text/plain",
 			Body:        []byte(body),
 		})
-	utils.FailOnError(err, "Failed to publish message")
+	FailOnError(err, "Failed to publish message")
 }
