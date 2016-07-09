@@ -46,11 +46,12 @@ func checkArgs(args []string) {
 
 func main() {
 	setupFlags()
+
 	args := flag.Args()
 	checkArgs(args)
 
 	hostAddr := args[0]
-	dclient := NewDockerClient(hostAddr)
+	dispatcher := NewDispatcher(hostAddr)
 
 	images := dclient.GetImages()
 	fmt.Printf("Number of images %d\n", len(images))

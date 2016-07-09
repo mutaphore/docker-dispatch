@@ -22,5 +22,26 @@ type DockerInfo map[string]interface{}
 
 // Messages
 
+// docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+// Example:
+// Message {
+//   "run"
+//   "--rm"
+//   "hello-world"
+//   ""
+//   "echo hello"
+//   ""
+// }
 type Message struct {
+	dockercmd string
+	options   string
+	image     string
+	container string
+	cmd       string
+	args      string
+}
+
+type Result struct {
+	code    int
+	message string
 }

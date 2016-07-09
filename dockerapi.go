@@ -57,8 +57,7 @@ func (d *DockerClient) makeRequest(method, url string) []byte {
 }
 
 func (d *DockerClient) GetImages() []DockerImage {
-	url := d.pathPrefix + "/images/json"
-	body := d.makeRequest("GET", url)
+	body := d.makeRequest("GET", d.pathPrefix+"/images/json")
 	var images []DockerImage
 	err := json.Unmarshal(body, &images)
 	if err != nil {
@@ -68,8 +67,7 @@ func (d *DockerClient) GetImages() []DockerImage {
 }
 
 func (d *DockerClient) GetContainers() []DockerContainer {
-	url := d.pathPrefix + "/containers/json"
-	body := d.makeRequest("GET", url)
+	body := d.makeRequest("GET", d.pathPrefix+"/containers/json")
 	var containers []DockerContainer
 	err := json.Unmarshal(body, &containers)
 	if err != nil {
@@ -79,8 +77,7 @@ func (d *DockerClient) GetContainers() []DockerContainer {
 }
 
 func (d *DockerClient) GetInfo() DockerInfo {
-	url := d.pathPrefix + "/info"
-	body := d.makeRequest("GET", url)
+	body := d.makeRequest("GET", d.pathPrefix+"/info")
 	var info DockerInfo
 	err := json.Unmarshal(body, &info)
 	if err != nil {
@@ -88,4 +85,9 @@ func (d *DockerClient) GetInfo() DockerInfo {
 	}
 	log.Printf("%v", info)
 	return info
+}
+
+func (d *DockerClient) CreateContainer() {
+	body := d.makeRequest("POST", d.pathPrefix+"/containers/create")
+
 }
