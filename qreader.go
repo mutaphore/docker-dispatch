@@ -1,15 +1,14 @@
-package main
+package dockerdispatch
 
 import (
 	"github.com/streadway/amqp"
 	"log"
-	"os"
 )
 
 type QueueReader struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
-	inbound chan amqp.Delivery
+	inbound <-chan amqp.Delivery // receive only channel
 }
 
 func NewQueueReader(url, queue string) (*QueueReader, error) {
@@ -18,23 +17,23 @@ func NewQueueReader(url, queue string) (*QueueReader, error) {
 
 	qreader.conn, err = amqp.Dial(url)
 	if err != nil {
-		log.Printf("Failed to connect to queue address %s\n", addr)
+		log.Printf("Failed to connect to queue address url: %s\n", url)
 		return nil, err
 	}
 
-	qreader.channel, err = conn.Channel()
+	qreader.channel, err = qreader.conn.Channel()
 	if err != nil {
 		log.Printf("Failed to create channel\n")
 		return nil, err
 	}
 
-	return &qreader
+	return &qreader, nil
 }
 
-func (q *QueueReader) Consume(queue) (chan []byte, error) {
+func (q *QueueReader) Consume(queue string) (chan []byte, error) {
 	var err error
 	outbound := make(chan []byte)
-	q.inbound, err = ch.Consume(
+	q.inbound, err = q.channel.Consume(
 		queue,
 		"qreader",
 		true,

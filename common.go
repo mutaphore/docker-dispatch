@@ -1,5 +1,9 @@
 package dockerdispatch
 
+// Common data structures
+
+// Docker
+
 type DockerImage struct {
 	Id          string
 	ParentId    string
@@ -15,3 +19,8 @@ type DockerContainer struct {
 }
 
 type DockerInfo map[string]interface{}
+
+// Messages
+
+type Message struct {
+}
