@@ -22,7 +22,7 @@ func setupFlags() {
 // Rabbit queue address should be like amqp://guest:guest@localhost:5672/
 func usage() {
 	flag.Usage()
-	fmt.Println("docker-dispatch [options] DockerHostAddr AMPQAddr")
+	fmt.Println("docker-dispatch [options] DockerHostAddr AmqpAddr")
 }
 
 func checkURL(urlStr string) (*url.URL, error) {
