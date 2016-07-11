@@ -71,12 +71,12 @@ type DockerInfo map[string]interface{}
 //   ""
 // }
 type Message struct {
-	dockercmd string
-	options   string
-	image     string
-	container string
-	cmd       string
-	args      string
+	Dockercmd string
+	Options   string
+	Image     string
+	Container string
+	Cmd       string
+	Args      string
 }
 
 type Result struct {

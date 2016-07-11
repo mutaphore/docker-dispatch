@@ -3,6 +3,7 @@ package dockerdispatch
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -40,68 +41,99 @@ func NewDockerClient(hostAddr string) *DockerClient {
 	return dockerClient
 }
 
-func (d *DockerClient) makeRequest(method, url string, body io.Reader) ([]byte, error) {
+func (d *DockerClient) makeRequest(method, url string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-	resp, err := d.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	return d.httpClient.Do(req)
 }
 
+// Get list of images
 func (d *DockerClient) GetImages() ([]DockerImage, error) {
-	body, err := d.makeRequest("GET", d.pathPrefix+"/images/json", nil)
+	resp, err := d.makeRequest("GET", d.pathPrefix+"/images/json", nil)
 	if err != nil {
-		log.Printf("Error: %s", err.Error())
+		return nil, err
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+	var images []DockerImage
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
-	var images []DockerImage
 	err = json.Unmarshal(body, &images)
-	if err != nil {
-		log.Printf("Error: %s", err.Error())
-	}
 	return images, err
 }
 
+// Get list of containers
 func (d *DockerClient) GetContainers(all bool, filters map[string][]string) ([]DockerContainer, error) {
-	body, err := d.makeRequest("GET", d.pathPrefix+"/containers/json", nil)
+	resp, err := d.makeRequest("GET", d.pathPrefix+"/containers/json?all="+string(all), nil)
+	defer resp.Body.Close()
 	if err != nil {
-		log.Printf("Error: %s", err.Error())
 		return nil, err
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
 	}
 	var containers []DockerContainer
-	err = json.Unmarshal(body, &containers)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error: %s", err.Error())
+		return nil, err
 	}
+	err = json.Unmarshal(body, &containers)
 	return containers, err
 }
 
+// Get Docker info
 func (d *DockerClient) GetInfo() (DockerInfo, error) {
-	body, err := d.makeRequest("GET", d.pathPrefix+"/info", nil)
+	resp, err := d.makeRequest("GET", d.pathPrefix+"/info", nil)
+	defer resp.Body.Close()
 	if err != nil {
-		log.Printf("Error: %s", err.Error())
 		return nil, err
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
 	}
 	var info DockerInfo
-	err = json.Unmarshal(body, &info)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error: %s", err.Error())
+		return nil, err
 	}
+	err = json.Unmarshal(body, &info)
 	return info, err
 }
 
+// Create a container
 func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) (DockerContainer, error) {
 	b, err := json.Marshal(param)
 	if err != nil {
-		log.Printf("Error marshalling parameter: %v", param)
 		return nil, err
 	}
-	body, err := d.makeRequest("POST", d.pathPrefix+"/containers/create?name="+name, bytes.NewReader(b))
+	resp, err := d.makeRequest("POST", d.pathPrefix+"/containers/create?name="+name, bytes.NewReader(b))
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, err
+	} else if resp.StatusCode != 201 {
+		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
+	}
+	var container DockerContainer
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(body, &container)
+	return container, err
+}
+
+// Start a container
+func (d *DockerClient) StartContainer(idOrName string) error {
+	resp, err := d.makeRequest("POST", d.pathPrefix+"/containers/"+idOrName+"/start", nil)
+	if err != nil {
+		return err
+	} else if resp.StatusCode != 204 {
+		return fmt.Errorf("Error: %s", resp.StatusCode)
+	}
+	return nil
 }
