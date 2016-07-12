@@ -11,7 +11,7 @@ type QueueReader struct {
 	inbound <-chan amqp.Delivery // receive only channel
 }
 
-func NewQueueReader(url, queue string) (*QueueReader, error) {
+func NewQueueReader(url string) (*QueueReader, error) {
 	qreader := QueueReader{}
 	var err error
 
@@ -30,7 +30,7 @@ func NewQueueReader(url, queue string) (*QueueReader, error) {
 	return &qreader, nil
 }
 
-func (q *QueueReader) Consume(queue string) (chan []byte, error) {
+func (q *QueueReader) Consume(queue string) (<-chan []byte, error) {
 	var err error
 	outbound := make(chan []byte)
 	q.inbound, err = q.channel.Consume(

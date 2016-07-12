@@ -10,10 +10,12 @@ import (
 
 var (
 	verbose bool
+	queue   string
 )
 
 func setupFlags() {
 	flag.BoolVar(&verbose, "v", false, "Turn on debugging messages")
+	flag.StringVar(&queue, "q", "", "Queue name")
 	flag.Parse()
 }
 
@@ -45,20 +47,27 @@ func checkArgs(args []string) {
 }
 
 func main() {
+	// Parse command line arguments
 	setupFlags()
-
 	args := flag.Args()
 	checkArgs(args)
+	dockerAddr := args[0]
+	queueAddr := args[1]
 
-	hostAddr := args[0]
-	dispatcher := NewDispatcher(hostAddr)
+	// Create queue reader
+	qreader, err := NewQueueReader(queueAddr)
+	FailOnError(err, "Error connecting to queue")
+	out1, err := qreader.Consume(queue)
+	FailOnError(err, "Error reading from queue")
 
-	images := dclient.GetImages()
-	fmt.Printf("Number of images %d\n", len(images))
-	fmt.Printf("Images %v\n", images[0])
+	// Create parser
+	out2 := NewMessageParser(out1)
 
-	containers := dclient.GetContainers()
-	fmt.Printf("Number of containers %d\n", len(containers))
+	// Create dispatcher
+	dispatcher := NewDispatcher(dockerAddr)
+	out3 := dispatcher.Start(out2)
 
-	dclient.GetInfo()
+	for r := range out3 {
+		fmt.Printf("%v", r.data)
+	}
 }

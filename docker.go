@@ -116,7 +116,7 @@ func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) 
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 201 {
-		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
+		return nil, fmt.Errorf("%s", resp.StatusCode)
 	}
 	var container DockerContainer
 	body, err := ioutil.ReadAll(resp.Body)
@@ -133,7 +133,7 @@ func (d *DockerClient) StartContainer(idOrName string) error {
 	if err != nil {
 		return err
 	} else if resp.StatusCode != 204 {
-		return fmt.Errorf("Error: %s", resp.StatusCode)
+		return fmt.Errorf("%s", resp.StatusCode)
 	}
 	return nil
 }

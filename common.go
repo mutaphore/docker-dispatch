@@ -80,6 +80,5 @@ type Message struct {
 }
 
 type Result struct {
-	code    int
-	message string
+	data interface{}
 }
