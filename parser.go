@@ -1,4 +1,4 @@
-package dockerdispatch
+package main
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 // TODO: check validity of message fields
 
 // Returns a channel that parses bytes from an inbound channel into Message structs
-func NewMessageParser(inbound chan []byte) <-chan Message {
+func NewMessageParser(inbound <-chan []byte) <-chan Message {
 	outbound := make(chan Message)
 	go func() {
 		var m Message

@@ -1,4 +1,4 @@
-package dockerdispatch
+package main
 
 import (
 	"bytes"

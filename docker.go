@@ -1,4 +1,4 @@
-package dockerdispatch
+package main
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"path"
+	"strconv"
 )
 
 type DockerClient struct {
@@ -71,7 +72,7 @@ func (d *DockerClient) GetImages() ([]DockerImage, error) {
 
 // Get list of containers
 func (d *DockerClient) GetContainers(all bool, filters map[string][]string) ([]DockerContainer, error) {
-	resp, err := d.makeRequest("GET", d.pathPrefix+"/containers/json?all="+string(all), nil)
+	resp, err := d.makeRequest("GET", d.pathPrefix+"/containers/json?all="+strconv.FormatBool(all), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
@@ -88,7 +89,7 @@ func (d *DockerClient) GetContainers(all bool, filters map[string][]string) ([]D
 }
 
 // Get Docker info
-func (d *DockerClient) GetInfo() (DockerInfo, error) {
+func (d *DockerClient) GetInfo() (*DockerInfo, error) {
 	resp, err := d.makeRequest("GET", d.pathPrefix+"/info", nil)
 	defer resp.Body.Close()
 	if err != nil {
@@ -96,17 +97,17 @@ func (d *DockerClient) GetInfo() (DockerInfo, error) {
 	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
 	}
-	var info DockerInfo
+	info := DockerInfo{}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	err = json.Unmarshal(body, &info)
-	return info, err
+	return &info, err
 }
 
 // Create a container
-func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) (DockerContainer, error) {
+func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) (*DockerContainer, error) {
 	b, err := json.Marshal(param)
 	if err != nil {
 		return nil, err
@@ -118,13 +119,13 @@ func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) 
 	} else if resp.StatusCode != 201 {
 		return nil, fmt.Errorf("%s", resp.StatusCode)
 	}
-	var container DockerContainer
+	container := DockerContainer{}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 	err = json.Unmarshal(body, &container)
-	return container, err
+	return &container, err
 }
 
 // Start a container

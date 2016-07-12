@@ -1,4 +1,4 @@
-package dockerdispatch
+package main
 
 // Common data structures
 
@@ -75,7 +75,7 @@ type Message struct {
 	Options   string
 	Image     string
 	Container string
-	Cmd       string
+	Cmd       []string
 	Args      string
 }
 
