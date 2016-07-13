@@ -1,27 +1,51 @@
-package tests
+package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/streadway/amqp"
 	"log"
 	"os"
 )
 
+func FailOnError(err error, msg string) {
+	if err != nil {
+		s := fmt.Sprintf("%s - %s", msg, err)
+		log.Fatal(s)
+		panic(s)
+	}
+}
+
+type Message struct {
+	Dockercmd string
+	Options   string
+	Image     string
+	Container string
+	Cmd       []string
+	Args      string
+}
+
 func main() {
 	if len(os.Args) != 2 {
-		log.Println("Invalid number of arguments: producer qname")
-		os.Exit(1)
+		log.Fatal("Invalid number of arguments: producer <qname>")
 	}
 	qName := os.Args[1]
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
+	FailOnError(err, "Failed to connect to RabbitMQ")
 
 	ch, err := conn.Channel()
-	FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
+	FailOnError(err, "Failed to open a channel")
 
-	body := "Hello world"
+	body, err := json.Marshal(Message{
+		Dockercmd: "run",
+		Image:     "debian:jessie",
+		Container: "sayhello2",
+	})
+	FailOnError(err, "Failed to marshal body")
+
 	err = ch.Publish(
 		"",
 		qName,
@@ -29,7 +53,8 @@ func main() {
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(body),
-		})
+			Body:        body,
+		},
+	)
 	FailOnError(err, "Failed to publish message")
 }

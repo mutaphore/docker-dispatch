@@ -1,4 +1,4 @@
-package tests
+package main
 
 import (
 	"fmt"
@@ -7,20 +7,27 @@ import (
 	"os"
 )
 
+func FailOnError(err error, msg string) {
+	if err != nil {
+		s := fmt.Sprintf("%s - %s", msg, err)
+		log.Fatal(s)
+		panic(s)
+	}
+}
+
 func main() {
 	if len(os.Args) != 2 {
-		log.Println("Invalid number of arguments: startq qname")
-		os.Exit(1)
+		log.Fatal("Invalid number of arguments: startq <qname>")
 	}
 	qName := os.Args[1]
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
+	FailOnError(err, "Failed to connect to RabbitMQ")
 
 	ch, err := conn.Channel()
-	FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
+	FailOnError(err, "Failed to open a channel")
 
 	q, err := ch.QueueDeclare(
 		qName,
@@ -31,5 +38,6 @@ func main() {
 		nil,
 	)
 	FailOnError(err, "Failed to declare a queue")
+
 	fmt.Printf("Queue declared: %s\n", q.Name)
 }

@@ -7,7 +7,8 @@ import (
 
 func FailOnError(err error, msg string) {
 	if err != nil {
-		log.Fatal("%s: %s", msg, err)
-		panic(fmt.Sprintf("%s: %s", msg, err))
+		s := fmt.Sprintf("%s - %s", msg, err)
+		log.Fatal(s)
+		panic(s)
 	}
 }
