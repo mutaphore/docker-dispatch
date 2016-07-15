@@ -24,7 +24,7 @@ func setupFlags() {
 // Rabbit queue address should be like amqp://guest:guest@localhost:5672/
 func usage() {
 	flag.Usage()
-	fmt.Println("docker-dispatch [options] DockerHostAddr AmqpAddr")
+	fmt.Println("docker-dispatch [options] dockerHostAddr amqpAddr")
 }
 
 func checkURL(urlStr string) (*url.URL, error) {
@@ -59,15 +59,17 @@ func main() {
 	FailOnError(err, "Error connecting to queue")
 	out1, err := qreader.Consume(queue)
 	FailOnError(err, "Error reading from queue")
+	fmt.Printf("Connected to queue at: %s\n", queueAddr)
 
 	// Create parser
 	out2 := NewMessageParser(out1)
 
 	// Create dispatcher
 	dispatcher := NewDispatcher(dockerAddr)
+	fmt.Printf("Connected to docker at: %s\n", dockerAddr)
 	out3 := dispatcher.Start(out2)
 
 	for r := range out3 {
-		fmt.Printf("%v", r.data)
+		fmt.Printf("%v\n", r.data)
 	}
 }
