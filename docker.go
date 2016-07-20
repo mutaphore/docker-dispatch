@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+
+	"golang.org/x/net/websocket"
 )
 
 type DockerClient struct {
@@ -137,4 +139,26 @@ func (d *DockerClient) StartContainer(idOrName string) error {
 		return fmt.Errorf("%s", resp.StatusCode)
 	}
 	return nil
+}
+
+// Attach to a container
+func (d *DockerClient) AttachContainer(idOrName string) (chan string, error) {
+	ws, err := websocket.Dial(d.pathPrefix+"/containers/"+idOrName+"/attach/ws?stream=1&stdout=1", "", "http://localhost/")
+	outbound := make(chan string)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		var msg = make([]bytes, 512)
+		var n int
+		for {
+			n, err := ws.Read(msg)
+			if err != nil {
+				close(out)
+				return
+			}
+			outbound <- string(msg[:n])
+		}
+	}()
+	return outbound, nil
 }

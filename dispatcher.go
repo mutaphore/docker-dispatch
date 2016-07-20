@@ -22,7 +22,7 @@ func (d *Dispatcher) Start(inbound <-chan Message) <-chan Result {
 	go func() {
 		for m := range d.inbound {
 			if m.Dockercmd == "run" {
-				go d.DispatchRun(m)
+				go d.dispatchRunner(m)
 			} else {
 				d.outbound <- Result{data: fmt.Sprintf("Error: Unsupported operation %s", m.Dockercmd)}
 			}
@@ -31,7 +31,7 @@ func (d *Dispatcher) Start(inbound <-chan Message) <-chan Result {
 	return d.outbound
 }
 
-func (d *Dispatcher) DispatchRun(m Message) {
+func (d *Dispatcher) dispatchRunner(m Message) {
 	// Create a container
 	name := m.Container
 	param := CreateContainerParam{
@@ -50,10 +50,10 @@ func (d *Dispatcher) DispatchRun(m Message) {
 		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
 		return
 	}
-	// If in detached mode, display container's id
-	// else not in detached mode, attach to container
+	// In detached mode, display container's id
 	r := Result{
 		data: container.Id,
 	}
 	d.outbound <- r
+	// Not in detached mode, attach to container
 }
