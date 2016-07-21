@@ -7,12 +7,14 @@ import (
 type Dispatcher struct {
 	client   *DockerClient
 	inbound  <-chan Message // receive only channel for Messages
-	outbound chan Result
+	outbound chan Result    // outbound channel of results
+	attach   bool           // bind to container stdout
 }
 
-func NewDispatcher(hostAddr string) *Dispatcher {
+func NewDispatcher(hostAddr string, attach bool) *Dispatcher {
 	return &Dispatcher{
 		client: NewDockerClient(hostAddr),
+		attach: attach,
 	}
 }
 
@@ -22,16 +24,17 @@ func (d *Dispatcher) Start(inbound <-chan Message) <-chan Result {
 	go func() {
 		for m := range d.inbound {
 			if m.Dockercmd == "run" {
-				go d.dispatchRunner(m)
+				go d.dispatchRun(m)
 			} else {
 				d.outbound <- Result{data: fmt.Sprintf("Error: Unsupported operation %s", m.Dockercmd)}
 			}
 		}
+		close(d.outbound)
 	}()
 	return d.outbound
 }
 
-func (d *Dispatcher) dispatchRunner(m Message) {
+func (d *Dispatcher) dispatchRun(m Message) {
 	// Create a container
 	name := m.Container
 	param := CreateContainerParam{
@@ -50,10 +53,17 @@ func (d *Dispatcher) dispatchRunner(m Message) {
 		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
 		return
 	}
-	// In detached mode, display container's id
-	r := Result{
-		data: container.Id,
+	// Return container id
+	d.outbound <- Result{data: container.Id}
+	// Attach to container
+	if d.attach == true {
+		stdout, err := d.client.AttachContainer(name)
+		if err != nil {
+			d.outbound <- Result{data: err.Error()}
+			return
+		}
+		for s := range stdout {
+			d.outbound <- Result{data: s}
+		}
 	}
-	d.outbound <- r
-	// Not in detached mode, attach to container
 }

@@ -149,12 +149,11 @@ func (d *DockerClient) AttachContainer(idOrName string) (chan string, error) {
 		return nil, err
 	}
 	go func() {
-		var msg = make([]bytes, 512)
-		var n int
+		var msg = make([]byte, 512)
 		for {
 			n, err := ws.Read(msg)
 			if err != nil {
-				close(out)
+				close(outbound)
 				return
 			}
 			outbound <- string(msg[:n])
