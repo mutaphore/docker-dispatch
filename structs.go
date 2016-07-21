@@ -16,7 +16,7 @@ type CreateContainerParam struct {
 	StdinOnce       bool
 	Env             []string
 	Labels          map[string]string
-	Cmd             []string
+	Cmd             string
 	Entrypoint      []string
 	Image           string
 	Volumes         map[string]map[string]interface{}
@@ -75,7 +75,7 @@ type Message struct {
 	Options   string
 	Image     string
 	Container string
-	Cmd       []string
+	Cmd       string
 	Args      string
 }
 

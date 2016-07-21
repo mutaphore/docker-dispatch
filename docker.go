@@ -19,6 +19,7 @@ type DockerClient struct {
 	hostAddr   string
 	httpClient *http.Client
 	pathPrefix string
+	wsPrefix   string
 	logger     *log.Logger
 }
 
@@ -32,6 +33,7 @@ func NewDockerClient(hostAddr string) *DockerClient {
 		// http client transport uses TCP by default
 		dockerClient.httpClient = &http.Client{}
 		dockerClient.pathPrefix = "http://" + hostAddr
+		dockerClient.wsPrefix = "ws://" + hostAddr
 	} else if path.IsAbs(hostAddr) {
 		// custom transport for unix socket
 		dockerClient.httpClient = &http.Client{
@@ -115,7 +117,9 @@ func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) 
 		return nil, err
 	}
 	resp, err := d.makeRequest("POST", d.pathPrefix+"/containers/create?name="+name, bytes.NewReader(b))
-	defer resp.Body.Close()
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 201 {
@@ -143,13 +147,13 @@ func (d *DockerClient) StartContainer(idOrName string) error {
 
 // Attach to a container
 func (d *DockerClient) AttachContainer(idOrName string) (chan string, error) {
-	ws, err := websocket.Dial(d.pathPrefix+"/containers/"+idOrName+"/attach/ws?stream=1&stdout=1", "", "http://localhost/")
+	ws, err := websocket.Dial(d.wsPrefix+"/containers/"+idOrName+"/attach/ws?logs=0&stream=1&stdin=1&stdout=1&stderr=1", "", "http://127.0.0.1/")
 	outbound := make(chan string)
 	if err != nil {
 		return nil, err
 	}
 	go func() {
-		var msg = make([]byte, 512)
+		var msg = make([]byte, 4096)
 		for {
 			n, err := ws.Read(msg)
 			if err != nil {

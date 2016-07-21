@@ -21,7 +21,7 @@ type Message struct {
 	Options   string
 	Image     string
 	Container string
-	Cmd       []string
+	Cmd       string
 	Args      string
 }
 
@@ -42,7 +42,8 @@ func main() {
 	body, err := json.Marshal(Message{
 		Dockercmd: "run",
 		Image:     "debian:jessie",
-		Container: "sayhello2",
+		Container: "showthedate",
+		Cmd:       "ps",
 	})
 	FailOnError(err, "Failed to marshal body")
 

@@ -38,23 +38,17 @@ func (d *Dispatcher) dispatchRun(m Message) {
 	// Create a container
 	name := m.Container
 	param := CreateContainerParam{
-		Image: m.Image,
-		Cmd:   m.Cmd,
+		AttachStdin:  false,
+		AttachStderr: true,
+		AttachStdout: true,
+		Image:        m.Image,
+		Cmd:          m.Cmd,
 	}
 	container, err := d.client.CreateContainer(name, param)
 	if err != nil {
 		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
 		return
 	}
-	// TODO: If err status is 404, pull, create again
-	// Start container
-	err = d.client.StartContainer(name)
-	if err != nil {
-		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
-		return
-	}
-	// Return container id
-	d.outbound <- Result{data: container.Id}
 	// Attach to container
 	if d.attach == true {
 		stdout, err := d.client.AttachContainer(name)
@@ -62,8 +56,20 @@ func (d *Dispatcher) dispatchRun(m Message) {
 			d.outbound <- Result{data: err.Error()}
 			return
 		}
-		for s := range stdout {
-			d.outbound <- Result{data: s}
-		}
+		go func() {
+			for s := range stdout {
+				d.outbound <- Result{data: s}
+			}
+		}()
 	}
+	// TODO: If err status is 404, pull, create again
+	// Start container
+	err = d.client.StartContainer(name)
+	if err != nil {
+		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
+		// TODO: remove attached loop
+		return
+	}
+	// Return container id
+	d.outbound <- Result{data: container.Id}
 }
