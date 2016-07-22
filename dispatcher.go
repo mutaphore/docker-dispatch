@@ -49,6 +49,8 @@ func (d *Dispatcher) dispatchRun(m Message) {
 		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
 		return
 	}
+	// Return container id
+	d.outbound <- Result{data: container.Id}
 	// Attach to container
 	if d.attach == true {
 		stdout, err := d.client.AttachContainer(name)
@@ -70,6 +72,4 @@ func (d *Dispatcher) dispatchRun(m Message) {
 		// TODO: remove attached loop
 		return
 	}
-	// Return container id
-	d.outbound <- Result{data: container.Id}
 }

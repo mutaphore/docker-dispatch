@@ -21,7 +21,7 @@ type Message struct {
 	Options   string
 	Image     string
 	Container string
-	Cmd       string
+	Cmd       []string
 	Args      string
 }
 
@@ -43,7 +43,7 @@ func main() {
 		Dockercmd: "run",
 		Image:     "debian:jessie",
 		Container: "showthedate",
-		Cmd:       "ps",
+		Cmd:       []string{"echo", "hello"},
 	})
 	FailOnError(err, "Failed to marshal body")
 
