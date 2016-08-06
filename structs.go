@@ -64,7 +64,9 @@ type DockerInfo map[string]interface{}
 // Example:
 // Message {
 //   "run"
-//   "--rm"
+//   RunOptions {
+//   	 "rm"
+//   }
 //   "hello-world"
 //   ""
 //   "echo hello"
@@ -72,11 +74,17 @@ type DockerInfo map[string]interface{}
 // }
 type Message struct {
 	Dockercmd string
-	Options   string
+	Options   []byte
 	Image     string
 	Container string
 	Cmd       []string
 	Args      string
+}
+
+type RunOptions struct {
+	EntryPoint string
+	Volumes    string
+	Name       string
 }
 
 type Result struct {

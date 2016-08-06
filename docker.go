@@ -62,7 +62,7 @@ func (d *DockerClient) GetImages() ([]DockerImage, error) {
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
+		return nil, fmt.Errorf("GetImages: error status code %s", resp.StatusCode)
 	}
 	defer resp.Body.Close()
 	var images []DockerImage
@@ -81,7 +81,7 @@ func (d *DockerClient) GetContainers(all bool, filters map[string][]string) ([]D
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
+		return nil, fmt.Errorf("GetContainers: error status code %d", resp.StatusCode)
 	}
 	var containers []DockerContainer
 	body, err := ioutil.ReadAll(resp.Body)
@@ -99,7 +99,7 @@ func (d *DockerClient) GetInfo() (*DockerInfo, error) {
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Error: %s", resp.StatusCode)
+		return nil, fmt.Errorf("GetInfo: error status code %d", resp.StatusCode)
 	}
 	info := DockerInfo{}
 	body, err := ioutil.ReadAll(resp.Body)
@@ -123,7 +123,7 @@ func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) 
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 201 {
-		return nil, fmt.Errorf("%s", resp.StatusCode)
+		return nil, fmt.Errorf("CreateContainer: error status code %d", resp.StatusCode)
 	}
 	container := DockerContainer{}
 	body, err := ioutil.ReadAll(resp.Body)
@@ -140,14 +140,14 @@ func (d *DockerClient) StartContainer(idOrName string) error {
 	if err != nil {
 		return err
 	} else if resp.StatusCode != 204 {
-		return fmt.Errorf("%s", resp.StatusCode)
+		return fmt.Errorf("StartContainier: error status code %d", resp.StatusCode)
 	}
 	return nil
 }
 
 // Attach to a container
 func (d *DockerClient) AttachContainer(idOrName string) (chan string, error) {
-	ws, err := websocket.Dial(d.wsPrefix+"/containers/"+idOrName+"/attach/ws?logs=0&stream=1&stdin=1&stdout=1&stderr=1", "", "http://127.0.0.1/")
+	ws, err := websocket.Dial(d.wsPrefix+"/containers/"+idOrName+"/attach/ws?logs=1&stream=1&stdin=0&stdout=1&stderr=1", "", "http://127.0.0.1/")
 	outbound := make(chan string)
 	if err != nil {
 		return nil, err

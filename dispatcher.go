@@ -34,6 +34,7 @@ func (d *Dispatcher) Start(inbound <-chan Message) <-chan Result {
 	return d.outbound
 }
 
+// Dispatch a run container command
 func (d *Dispatcher) dispatchRun(m Message) {
 	// Create a container
 	name := m.Container
@@ -45,12 +46,13 @@ func (d *Dispatcher) dispatchRun(m Message) {
 		Cmd:          m.Cmd,
 	}
 	container, err := d.client.CreateContainer(name, param)
+	// TODO: If err status is 404, pull image first, create again
 	if err != nil {
 		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
 		return
 	}
 	// Return container id
-	d.outbound <- Result{data: container.Id}
+	d.outbound <- Result{data: fmt.Sprintf("Container id: %s", container.Id)}
 	// Attach to container
 	if d.attach == true {
 		stdout, err := d.client.AttachContainer(name)
@@ -64,7 +66,6 @@ func (d *Dispatcher) dispatchRun(m Message) {
 			}
 		}()
 	}
-	// TODO: If err status is 404, pull, create again
 	// Start container
 	err = d.client.StartContainer(name)
 	if err != nil {
@@ -72,4 +73,14 @@ func (d *Dispatcher) dispatchRun(m Message) {
 		// TODO: remove attached loop
 		return
 	}
+}
+
+// Dispatch a stop container command
+func (d *Dispatcher) dispatchStop() {
+
+}
+
+// Dispatch a remove container command
+func (d *Dispatcher) dispatchRemove() {
+
 }

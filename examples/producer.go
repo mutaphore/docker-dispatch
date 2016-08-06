@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
@@ -14,15 +13,6 @@ func FailOnError(err error, msg string) {
 		log.Fatal(s)
 		panic(s)
 	}
-}
-
-type Message struct {
-	Dockercmd string
-	Options   string
-	Image     string
-	Container string
-	Cmd       []string
-	Args      string
 }
 
 func main() {
@@ -39,13 +29,14 @@ func main() {
 	defer ch.Close()
 	FailOnError(err, "Failed to open a channel")
 
-	body, err := json.Marshal(Message{
-		Dockercmd: "run",
-		Image:     "debian:jessie",
-		Container: "showthedate",
-		Cmd:       []string{"echo", "hello"},
-	})
-	FailOnError(err, "Failed to marshal body")
+	var jsonBlob = []byte(`{
+		"Dockercmd": "run",
+		"Options": {
+			"Name": "say_hello"
+		},
+		"Image": "debian:jessie",
+		"Cmd": ["echo", "hello"]
+	}`)
 
 	err = ch.Publish(
 		"",
@@ -54,7 +45,7 @@ func main() {
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        body,
+			Body:        jsonBlob,
 		},
 	)
 	FailOnError(err, "Failed to publish message")

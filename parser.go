@@ -17,9 +17,13 @@ func NewMessageParser(inbound <-chan []byte) <-chan Message {
 			err = json.Unmarshal(msg, &m)
 			if err != nil {
 				log.Printf("Error in decoding message: %s", msg)
-			} else {
-				outbound <- m
+				continue
 			}
+			if m.Dockercmd == "run" {
+				opt := RunOptions{}
+				err = json.Unmarshal(m.Options, &opt)
+			}
+			outbound <- m
 		}
 	}()
 	return outbound
