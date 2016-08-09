@@ -74,14 +74,15 @@ type DockerInfo map[string]interface{}
 // }
 type Message struct {
 	Dockercmd string
-	Options   []byte
+	Options   Options
 	Image     string
 	Container string
 	Cmd       []string
 	Args      string
 }
 
-type RunOptions struct {
+type Options struct {
+	Attach     []string
 	EntryPoint string
 	Volumes    string
 	Name       string

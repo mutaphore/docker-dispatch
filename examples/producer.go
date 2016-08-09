@@ -32,6 +32,7 @@ func main() {
 	var jsonBlob = []byte(`{
 		"Dockercmd": "run",
 		"Options": {
+			"Attach": ["STDERR", "STDOUT"],
 			"Name": "say_hello"
 		},
 		"Image": "debian:jessie",

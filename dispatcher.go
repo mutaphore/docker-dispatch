@@ -11,10 +11,9 @@ type Dispatcher struct {
 	attach   bool           // bind to container stdout
 }
 
-func NewDispatcher(hostAddr string, attach bool) *Dispatcher {
+func NewDispatcher(hostAddr string) *Dispatcher {
 	return &Dispatcher{
 		client: NewDockerClient(hostAddr),
-		attach: attach,
 	}
 }
 
@@ -23,9 +22,14 @@ func (d *Dispatcher) Start(inbound <-chan Message) <-chan Result {
 	d.outbound = make(chan Result)
 	go func() {
 		for m := range d.inbound {
-			if m.Dockercmd == "run" {
+			switch m.Dockercmd {
+			case "run":
 				go d.dispatchRun(m)
-			} else {
+			case "stop":
+				go d.dispatchStop(m)
+			case "remove":
+				go d.dispatchRemove(m)
+			default:
 				d.outbound <- Result{data: fmt.Sprintf("Error: Unsupported operation %s", m.Dockercmd)}
 			}
 		}
@@ -36,12 +40,22 @@ func (d *Dispatcher) Start(inbound <-chan Message) <-chan Result {
 
 // Dispatch a run container command
 func (d *Dispatcher) dispatchRun(m Message) {
-	// Create a container
-	name := m.Container
+	// Generate random string if container name option doesn't exist
+	name := m.Options.Name
+	if name == nil {
+		_, name = genRandStr(32)
+	}
+	// 1. Create a container
+	var attachStdin bool
+	var attachStderr bool
+	var attachStdout bool
+	if m.Options.Attach {
+		attachStderr, attachStdin = true, true
+	}
 	param := CreateContainerParam{
-		AttachStdin:  false,
-		AttachStderr: true,
-		AttachStdout: true,
+		AttachStdin:  itemInList("STDIN", m.Options.Attach),
+		AttachStderr: itemInList("STDERR", m.Options.Attach),
+		AttachStdout: itemInList("STDOUT", m.Options.Attach),
 		Image:        m.Image,
 		Cmd:          m.Cmd,
 	}
@@ -53,7 +67,7 @@ func (d *Dispatcher) dispatchRun(m Message) {
 	}
 	// Return container id
 	d.outbound <- Result{data: fmt.Sprintf("Container id: %s", container.Id)}
-	// Attach to container
+	// 2. Attach to container
 	if d.attach == true {
 		stdout, err := d.client.AttachContainer(name)
 		if err != nil {
@@ -66,7 +80,7 @@ func (d *Dispatcher) dispatchRun(m Message) {
 			}
 		}()
 	}
-	// Start container
+	// 3. Start container
 	err = d.client.StartContainer(name)
 	if err != nil {
 		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
@@ -76,11 +90,11 @@ func (d *Dispatcher) dispatchRun(m Message) {
 }
 
 // Dispatch a stop container command
-func (d *Dispatcher) dispatchStop() {
+func (d *Dispatcher) dispatchStop(m Message) {
 
 }
 
 // Dispatch a remove container command
-func (d *Dispatcher) dispatchRemove() {
+func (d *Dispatcher) dispatchRemove(m Message) {
 
 }

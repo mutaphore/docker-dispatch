@@ -23,7 +23,10 @@ func setupFlags() {
 // Docker host address should have format like 172.17.0.1:2375 for tcp or /var/run/docker.sock for socket
 // Rabbit queue address should be like amqp://guest:guest@localhost:5672/
 func usage() {
-	fmt.Println("Usage: docker-dispatch [options] dockerHostIpAddress:port amqpAddr")
+	fmt.Println("Usage: docker-dispatch [OPTIONS] DOCKERHOST AMQPADDR\n")
+	fmt.Println("Dispatch docker containers from commands passed through queue\n")
+	fmt.Println("DOCKERHOST is a ip:port tcp address or a unix socket path. Examples: 172.17.0.1:2375 or /var/run/docker.sock")
+	fmt.Println("AMQPADDR is a full RabbitMQ uri. Example: amqp://guest:guest@localhost:5672\n")
 	fmt.Println("Options:")
 	fmt.Println("  -q, queue name")
 	fmt.Println("  -v, verbose")
