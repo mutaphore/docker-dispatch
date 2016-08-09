@@ -1,5 +1,5 @@
 # Docker Dispatch
-A service that dispatches Docker containers from RabbitMQ messages.
+WARNING: This repo is still being worked on! A service that dispatches Docker containers from RabbitMQ messages.
 
 
 ## Architecture
