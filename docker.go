@@ -58,7 +58,7 @@ func (d *DockerClient) makeRequest(method, url string, body io.Reader) (*http.Re
 
 // Get list of images
 func (d *DockerClient) GetImages() ([]DockerImage, error) {
-	resp, err := d.makeRequest("GET", d.pathPrefix+"/images/json", nil)
+	resp, err := d.makeRequest("GET", fmt.Sprintf("%s/images/json", d.pathPrefix), nil)
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode != 200 {
@@ -76,7 +76,7 @@ func (d *DockerClient) GetImages() ([]DockerImage, error) {
 
 // Get list of containers
 func (d *DockerClient) GetContainers(all bool, filters map[string][]string) ([]DockerContainer, error) {
-	resp, err := d.makeRequest("GET", d.pathPrefix+"/containers/json?all="+strconv.FormatBool(all), nil)
+	resp, err := d.makeRequest("GET", fmt.Sprintf("%s/containers/json?all=%s", d.pathPrefix, strconv.FormatBool(all)), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (d *DockerClient) GetContainers(all bool, filters map[string][]string) ([]D
 
 // Get Docker info
 func (d *DockerClient) GetInfo() (*DockerInfo, error) {
-	resp, err := d.makeRequest("GET", d.pathPrefix+"/info", nil)
+	resp, err := d.makeRequest("GET", fmt.Sprintf("%s/info", d.pathPrefix), nil)
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) 
 	if err != nil {
 		return nil, err
 	}
-	resp, err := d.makeRequest("POST", d.pathPrefix+"/containers/create?name="+name, bytes.NewReader(b))
+	resp, err := d.makeRequest("POST", fmt.Sprintf("%s/containers/create?name=%s", d.pathPrefix, name), bytes.NewReader(b))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -136,7 +136,7 @@ func (d *DockerClient) CreateContainer(name string, param CreateContainerParam) 
 
 // Start a container
 func (d *DockerClient) StartContainer(idOrName string) error {
-	resp, err := d.makeRequest("POST", d.pathPrefix+"/containers/"+idOrName+"/start", nil)
+	resp, err := d.makeRequest("POST", fmt.Sprintf("%s/containers/%s/start", d.pathPrefix, idOrName), nil)
 	if err != nil {
 		return err
 	} else if resp.StatusCode != 204 {
@@ -145,9 +145,32 @@ func (d *DockerClient) StartContainer(idOrName string) error {
 	return nil
 }
 
+// Stop a container after t seconds
+func (d *DockerClient) StopContainer(idOrName string, t int) error {
+	resp, err := d.makeRequest("POST", fmt.Sprintf("%s/containers/%s/stop?t=%d", d.pathPrefix, idOrName, t), nil)
+	if err != nil {
+		return err
+	} else if resp.StatusCode != 204 {
+		return fmt.Errorf("StopContainier: error status code %d", resp.StatusCode)
+	}
+	return nil
+}
+
+// Remove a container
+func (d *DockerClient) RemoveContainer(idOrName string, volume, force bool) error {
+	resp, err := d.makeRequest("DELETE", fmt.Sprintf("%s/containers/%s?v=%v&force=%v", d.pathPrefix, idOrName, volume, force), nil)
+	if err != nil {
+		return err
+	} else if resp.StatusCode != 204 {
+		return fmt.Errorf("RemoveContainier: error status code %d", resp.StatusCode)
+	}
+	return nil
+}
+
 // Attach to a container
-func (d *DockerClient) AttachContainer(idOrName string) (chan string, error) {
-	ws, err := websocket.Dial(d.wsPrefix+"/containers/"+idOrName+"/attach/ws?logs=1&stream=1&stdin=0&stdout=1&stderr=1", "", "http://127.0.0.1/")
+func (d *DockerClient) AttachContainer(idOrName string, logs, stream, stdin, stdout, stderr bool) (chan string, error) {
+	uri := fmt.Sprintf("%s/containers/%s/attach/ws?logs=%v&stream=%v&stdin=%v&stdout=%v", d.wsPrefix, idOrName, logs, stream, stdin, stdout, stderr)
+	ws, err := websocket.Dial(uri, "", "http://127.0.0.1/")
 	outbound := make(chan string)
 	if err != nil {
 		return nil, err

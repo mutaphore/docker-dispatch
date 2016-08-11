@@ -46,16 +46,14 @@ func (d *Dispatcher) dispatchRun(m Message) {
 		_, name = genRandStr(32)
 	}
 	// 1. Create a container
-	var attachStdin bool
-	var attachStderr bool
-	var attachStdout bool
+	var attach []string
 	if m.Options.Attach {
-		attachStderr, attachStdin = true, true
+		attach = m.Options.Attach
 	}
 	param := CreateContainerParam{
-		AttachStdin:  itemInList("STDIN", m.Options.Attach),
-		AttachStderr: itemInList("STDERR", m.Options.Attach),
-		AttachStdout: itemInList("STDOUT", m.Options.Attach),
+		AttachStdin:  itemInList("STDIN", attach),
+		AttachStderr: itemInList("STDERR", attach),
+		AttachStdout: itemInList("STDOUT", attach),
 		Image:        m.Image,
 		Cmd:          m.Cmd,
 	}

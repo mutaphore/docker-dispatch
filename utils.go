@@ -17,18 +17,11 @@ func genRandStr(size int) (error, string) {
 	return nil, rs
 }
 
-func itemsInList(items []interface{}, list []interface{}) []bool {
-	var table map[interface{}]bool
-	for _, x := range items {
-		table[x] = true
-	}
-	var exist []bool
+func itemInList(item interface{}, list []interface{}) bool {
 	for _, y := range list {
-		if table[y] {
-			exist = append(exist, true)
-		} else {
-			exist = append(exist, false)
+		if reflect.DeepEqual(item, y) {
+			return true
 		}
 	}
-	return exist
+	return false
 }
