@@ -169,7 +169,7 @@ func (d *DockerClient) RemoveContainer(idOrName string, volume, force bool) erro
 
 // Attach to a container via websocket
 func (d *DockerClient) AttachContainer(idOrName string, logs, stream, stdin, stdout, stderr bool) (chan string, error) {
-	uri := fmt.Sprintf("%s/containers/%s/attach/ws?logs=%v&stream=%v&stdin=%v&stdout=%v", d.wsPrefix, idOrName, logs, stream, stdin, stdout, stderr)
+	uri := fmt.Sprintf("%s/containers/%s/attach/ws?logs=%v&stream=%v&stdin=%v&stdout=%v&stderr=%v", d.wsPrefix, idOrName, logs, stream, stdin, stdout, stderr)
 	ws, err := websocket.Dial(uri, "", "http://127.0.0.1/")
 	outbound := make(chan string)
 	if err != nil {

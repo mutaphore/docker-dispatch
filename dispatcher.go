@@ -23,13 +23,13 @@ func (d *Dispatcher) Start() <-chan Result {
 		for m := range d.inbound {
 			switch m.Dockercmd {
 			case "run":
-				go d.dispatchRun(m)
+				go d.run(m)
 			case "stop":
-				go d.dispatchStop(m)
+				go d.stop(m)
 			case "remove":
-				go d.dispatchRemove(m)
+				go d.remove(m)
 			default:
-				d.outbound <- Result{data: fmt.Sprintf("Error: Unsupported operation %s", m.Dockercmd)}
+				d.outbound <- Result{Data: fmt.Sprintf("Error: Unsupported operation %s", m.Dockercmd)}
 			}
 		}
 		close(d.outbound)
@@ -38,7 +38,7 @@ func (d *Dispatcher) Start() <-chan Result {
 }
 
 // Dispatch a run container command
-func (d *Dispatcher) dispatchRun(m Message) {
+func (d *Dispatcher) run(m Message) {
 	// Generate random string for container name if container name option doesn't exist
 	name := m.Options.Name
 	if name == "" {
@@ -59,43 +59,43 @@ func (d *Dispatcher) dispatchRun(m Message) {
 	container, err := d.client.CreateContainer(name, param)
 	// TODO: If err status is 404, pull image first, create again
 	if err != nil {
-		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
+		d.outbound <- Result{Data: fmt.Sprintf("Error: %s", err.Error())}
 		return
 	}
-
-	// 1.1 Return container id
-	d.outbound <- Result{data: fmt.Sprintf("Container id: %s", container.Id)}
 
 	// 2. Attach to container
 	if stdin || stderr || stdout {
 		// default logs and stream to true
 		output, err := d.client.AttachContainer(name, true, true, stdin, stdout, stderr)
 		if err != nil {
-			d.outbound <- Result{data: err.Error()}
+			d.outbound <- Result{Id: container.Id, Data: err.Error()}
 			return
 		}
 		go func() {
 			for s := range output {
-				d.outbound <- Result{data: s}
+				d.outbound <- Result{Id: container.Id, Data: s}
 			}
 		}()
+	} else {
+		// if not attaching, just return container id
+		d.outbound <- Result{Id: container.Id, Data: fmt.Sprintf("Container id: %s", container.Id)}
 	}
 
 	// 3. Start container
 	err = d.client.StartContainer(name)
 	if err != nil {
-		d.outbound <- Result{data: fmt.Sprintf("Error: %s", err.Error())}
+		d.outbound <- Result{Data: fmt.Sprintf("Error: %s", err.Error())}
 		// TODO: remove attached loop
 		return
 	}
 }
 
 // Dispatch a stop container command
-func (d *Dispatcher) dispatchStop(m Message) {
+func (d *Dispatcher) stop(m Message) {
 
 }
 
 // Dispatch a remove container command
-func (d *Dispatcher) dispatchRemove(m Message) {
+func (d *Dispatcher) remove(m Message) {
 
 }

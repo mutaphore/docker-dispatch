@@ -61,7 +61,7 @@ type DockerInfo map[string]interface{}
 // Messages
 
 // docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
-// Example:
+// An example message object:
 // Message {
 //   "run"
 //   RunOptions {
@@ -76,9 +76,7 @@ type Message struct {
 	Dockercmd string
 	Options   Options
 	Image     string
-	Container string
 	Cmd       []string
-	Args      string
 }
 
 type Options struct {
@@ -89,5 +87,6 @@ type Options struct {
 }
 
 type Result struct {
-	data interface{}
+	Id   string      // container id
+	Data interface{} // data
 }

@@ -25,8 +25,8 @@ func setupFlags() {
 func usage() {
 	fmt.Println("Usage: docker-dispatch [OPTIONS] DOCKERHOST AMQPADDR\n")
 	fmt.Println("Dispatch docker containers from commands passed through queue\n")
-	fmt.Println("DOCKERHOST is a ip:port tcp address or a unix socket path. Examples: 172.17.0.1:2375 or /var/run/docker.sock")
-	fmt.Println("AMQPADDR is a full RabbitMQ uri. Example: amqp://guest:guest@localhost:5672\n")
+	fmt.Println("DOCKERHOST - ip:port tcp address or a unix socket path. Examples: 172.17.0.1:2375 or /var/run/docker.sock")
+	fmt.Println("AMQPADDR   - full RabbitMQ uri. Example: amqp://guest:guest@localhost:5672\n")
 	fmt.Println("Options:")
 	fmt.Println("  -q, queue name")
 	fmt.Println("  -v, verbose")
@@ -62,20 +62,20 @@ func main() {
 	// Create queue reader
 	qreader, err := NewQueueReader(queueAddr)
 	FailOnError(err, fmt.Sprintf("Error connecting to queue at %s\n", queueAddr))
-	out1, err := qreader.Consume(queue)
+	queueOutput, err := qreader.Consume(queue)
 	FailOnError(err, fmt.Sprintf("Error reading from queue '%s'\n", queue))
-	fmt.Printf("Connected to queue: %s\n", queueAddr)
+	fmt.Printf("Connected to queue %s at %s\n", queue, queueAddr)
 
-	// Create parser
-	out2 := NewMessageParser(out1)
+	// Create message parser
+	parserOutput := NewMessageParser(queueOutput)
 
 	// Create dispatcher
-	dispatcher := NewDispatcher(dockerAddr, out2)
-	out3 := dispatcher.Start()
-	fmt.Printf("Connected to docker: %s\n", dockerAddr)
+	dispatcher := NewDispatcher(dockerAddr, parserOutput)
+	dispOutput := dispatcher.Start()
+	fmt.Printf("Connected to docker at %s\n", dockerAddr)
 
 	// Output results data
-	for r := range out3 {
-		fmt.Printf("%v\n", r.data)
+	for r := range dispOutput {
+		fmt.Printf("%s| %v\n", r.Id, r.Data)
 	}
 }
