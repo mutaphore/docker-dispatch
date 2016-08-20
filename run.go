@@ -70,10 +70,11 @@ func main() {
 	out2 := NewMessageParser(out1)
 
 	// Create dispatcher
-	dispatcher := NewDispatcher(dockerAddr, true)
+	dispatcher := NewDispatcher(dockerAddr, out2)
+	out3 := dispatcher.Start()
 	fmt.Printf("Connected to docker: %s\n", dockerAddr)
-	out3 := dispatcher.Start(out2)
 
+	// Output results data
 	for r := range out3 {
 		fmt.Printf("%v\n", r.data)
 	}
