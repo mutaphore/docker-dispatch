@@ -157,8 +157,8 @@ func (d *DockerClient) StopContainer(idOrName string, t int) error {
 }
 
 // Remove a container
-func (d *DockerClient) RemoveContainer(idOrName string, volume, force bool) error {
-	resp, err := d.makeRequest("DELETE", fmt.Sprintf("%s/containers/%s?v=%v&force=%v", d.pathPrefix, idOrName, volume, force), nil)
+func (d *DockerClient) RemoveContainer(idOrName string, volumes, force bool) error {
+	resp, err := d.makeRequest("DELETE", fmt.Sprintf("%s/containers/%s?v=%v&force=%v", d.pathPrefix, idOrName, volumes, force), nil)
 	if err != nil {
 		return err
 	} else if resp.StatusCode != 204 {

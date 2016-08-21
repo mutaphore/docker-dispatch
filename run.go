@@ -76,6 +76,6 @@ func main() {
 
 	// Output results data
 	for r := range dispOutput {
-		fmt.Printf("%s| %v\n", r.Id, r.Data)
+		fmt.Printf("%s | %v\n", r.Name, r.Data)
 	}
 }

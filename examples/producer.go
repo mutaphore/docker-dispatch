@@ -29,16 +29,13 @@ func main() {
 	defer ch.Close()
 	FailOnError(err, "Failed to open a channel")
 
-	var jsonBlob = []byte(`{
-		"Dockercmd": "run",
-		"Options": {
-			"Attach": ["STDERR", "STDOUT"],
-			"Name": "say_hello"
-		},
-		"Image": "debian:jessie",
-		"Cmd": ["echo", "hello"]
-	}`)
+	containerName := "sayhello"
 
+	// remove container
+	rmStr := fmt.Sprintf(`{
+		"Dockercmd": "remove",
+		"Container": "%s"
+	}`, containerName)
 	err = ch.Publish(
 		"",
 		qName,
@@ -46,8 +43,31 @@ func main() {
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        jsonBlob,
+			Body:        []byte(rmStr),
 		},
 	)
 	FailOnError(err, "Failed to publish message")
+
+	// run container
+	runStr := fmt.Sprintf(`{
+		"Dockercmd": "run",
+		"Options": {
+			"Attach": ["STDERR", "STDOUT"],
+			"Name": "%s"
+		},
+		"Image": "debian:jessie",
+		"Cmd": ["echo", "hello"]
+	}`, containerName)
+	err = ch.Publish(
+		"",
+		qName,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(runStr),
+		},
+	)
+	FailOnError(err, "Failed to publish message")
+
 }

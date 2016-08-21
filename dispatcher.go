@@ -68,23 +68,23 @@ func (d *Dispatcher) run(m Message) {
 		// default logs and stream to true
 		output, err := d.client.AttachContainer(name, true, true, stdin, stdout, stderr)
 		if err != nil {
-			d.outbound <- Result{Id: container.Id, Data: err.Error()}
+			d.outbound <- Result{Id: container.Id, Name: name, Data: err.Error()}
 			return
 		}
 		go func() {
 			for s := range output {
-				d.outbound <- Result{Id: container.Id, Data: s}
+				d.outbound <- Result{Id: container.Id, Name: name, Data: s}
 			}
 		}()
 	} else {
-		// if not attaching, just return container id
-		d.outbound <- Result{Id: container.Id, Data: fmt.Sprintf("Container id: %s", container.Id)}
+		// if we're not attaching to container output, just return container id
+		d.outbound <- Result{Id: container.Id, Name: name, Data: fmt.Sprintf("Container id: %s", container.Id)}
 	}
 
 	// 3. Start container
 	err = d.client.StartContainer(name)
 	if err != nil {
-		d.outbound <- Result{Data: fmt.Sprintf("Error: %s", err.Error())}
+		d.outbound <- Result{Id: container.Id, Name: name, Data: fmt.Sprintf("Error: %s", err.Error())}
 		// TODO: remove attached loop
 		return
 	}
@@ -92,10 +92,23 @@ func (d *Dispatcher) run(m Message) {
 
 // Dispatch a stop container command
 func (d *Dispatcher) stop(m Message) {
-
+	// get number of seconds to wait before killing the container
+	time := m.Options.Time
+	if time == 0 {
+		time = 10
+	}
+	err := d.client.StopContainer(m.Container, time)
+	if err != nil {
+		d.outbound <- Result{Data: err.Error()}
+		return
+	}
 }
 
 // Dispatch a remove container command
 func (d *Dispatcher) remove(m Message) {
-
+	err := d.client.RemoveContainer(m.Container, m.Options.Volumes, m.Options.Force)
+	if err != nil {
+		d.outbound <- Result{Data: err.Error()}
+		return
+	}
 }

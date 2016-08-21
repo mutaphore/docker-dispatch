@@ -76,17 +76,21 @@ type Message struct {
 	Dockercmd string
 	Options   Options
 	Image     string
+	Container string
 	Cmd       []string
 }
 
 type Options struct {
 	Attach     []string
-	EntryPoint string
-	Volumes    string
+	Entrypoint string
 	Name       string
+	Time       int
+	Volumes    bool
+	Force      bool
 }
 
 type Result struct {
-	Id   string      // container id
+	Id   string      // container unique id
+	Name string      // container name
 	Data interface{} // data
 }
