@@ -71,11 +71,24 @@ func main() {
 
 	// Create dispatcher
 	dispatcher := NewDispatcher(dockerAddr, parserOutput)
+
+	// terminate program after last of 100 containers exited
+	go func() {
+		counter := 0
+		for e := range dispatcher.exited {
+			_ = e // ignore
+			counter += 1
+			if counter == 100 {
+				os.Exit(0)
+			}
+		}
+	}()
+
 	dispOutput := dispatcher.Start()
 	fmt.Printf("Connected to docker at %s\n", dockerAddr)
 
 	// Output results data
 	for r := range dispOutput {
-		fmt.Printf("%s | %v", r.Name, r.Data)
+		fmt.Printf("%-25s | %v", r.Name, r.Data)
 	}
 }

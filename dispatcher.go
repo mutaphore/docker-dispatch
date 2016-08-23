@@ -2,18 +2,22 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/docker/docker/pkg/namesgenerator"
 )
 
 type Dispatcher struct {
 	client   *DockerClient  // internal Docker client
 	inbound  <-chan Message // receive only channel for Messages
 	outbound chan Result    // outbound channel of results
+	exited   chan string    // channel sending back exited containers
 }
 
 func NewDispatcher(hostAddr string, inbound <-chan Message) *Dispatcher {
 	return &Dispatcher{
 		client:  NewDockerClient(hostAddr),
 		inbound: inbound,
+		exited:  make(chan string, 200),
 	}
 }
 
@@ -42,7 +46,7 @@ func (d *Dispatcher) run(m Message) {
 	// Generate random string for container name if container name option doesn't exist
 	name := m.Options.Name
 	if name == "" {
-		_, name = genRandStr(32)
+		name = namesgenerator.GetRandomName(0)
 	}
 
 	// 1. Create a container
@@ -101,6 +105,7 @@ func (d *Dispatcher) run(m Message) {
 			d.outbound <- Result{Id: container.Id, Name: name, Data: fmt.Sprintf("Error: %s", err.Error())}
 			return
 		}
+		d.exited <- container.Id
 	}
 }
 

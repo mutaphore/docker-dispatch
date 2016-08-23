@@ -5,7 +5,6 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"os"
-	"strconv"
 )
 
 func FailOnError(err error, msg string) {
@@ -30,21 +29,17 @@ func main() {
 	defer ch.Close()
 	FailOnError(err, "Failed to open a channel")
 
-	containerName := "sayhello"
-
 	// run containers
-	for i := 0; i < 10; i++ {
-		runStr := fmt.Sprintf(`{
+	for i := 0; i < 100; i++ {
+		runStr := `{
 			"Dockercmd": "run",
 			"Options": {
 				"Attach": ["STDERR", "STDOUT"],
-				"Name": "%s",
 				"Remove": true
 			},
 			"Image": "debian:jessie",
 			"Cmd": ["echo", "hello world!"]
-		}`, containerName+"_"+strconv.Itoa(i))
-
+		}`
 		err = ch.Publish(
 			"",
 			qName,
