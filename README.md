@@ -30,6 +30,8 @@ Example:
 ./dockerdispatch -q myqueue 172.17.0.1:2375 amqp://guest:guest@localhost:5672
 ```
 
+For more information on how to setup Docker to bind to different addresses see [here](https://docs.docker.com/engine/reference/commandline/dockerd/#bind-docker-to-another-host-port-or-a-unix-socket).
+
 
 ## Options
 ```

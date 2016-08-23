@@ -5,6 +5,7 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"os"
+	"strconv"
 )
 
 func FailOnError(err error, msg string) {
@@ -31,43 +32,29 @@ func main() {
 
 	containerName := "sayhello"
 
-	// remove container
-	rmStr := fmt.Sprintf(`{
-		"Dockercmd": "remove",
-		"Container": "%s"
-	}`, containerName)
-	err = ch.Publish(
-		"",
-		qName,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(rmStr),
-		},
-	)
-	FailOnError(err, "Failed to publish message")
+	// run containers
+	for i := 0; i < 10; i++ {
+		runStr := fmt.Sprintf(`{
+			"Dockercmd": "run",
+			"Options": {
+				"Attach": ["STDERR", "STDOUT"],
+				"Name": "%s",
+				"Remove": true
+			},
+			"Image": "debian:jessie",
+			"Cmd": ["echo", "hello world!"]
+		}`, containerName+"_"+strconv.Itoa(i))
 
-	// run container
-	runStr := fmt.Sprintf(`{
-		"Dockercmd": "run",
-		"Options": {
-			"Attach": ["STDERR", "STDOUT"],
-			"Name": "%s"
-		},
-		"Image": "debian:jessie",
-		"Cmd": ["echo", "hello"]
-	}`, containerName)
-	err = ch.Publish(
-		"",
-		qName,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(runStr),
-		},
-	)
-	FailOnError(err, "Failed to publish message")
-
+		err = ch.Publish(
+			"",
+			qName,
+			false,
+			false,
+			amqp.Publishing{
+				ContentType: "text/plain",
+				Body:        []byte(runStr),
+			},
+		)
+		FailOnError(err, "Failed to publish message")
+	}
 }

@@ -188,3 +188,14 @@ func (d *DockerClient) AttachContainer(idOrName string, logs, stream, stdin, std
 	}()
 	return outbound, nil
 }
+
+// Wait for a container
+func (d *DockerClient) WaitContainer(idOrName string) error {
+	resp, err := d.makeRequest("POST", fmt.Sprintf("%s/containers/%s/wait", d.pathPrefix, idOrName), nil)
+	if err != nil {
+		return err
+	} else if resp.StatusCode != 200 {
+		return fmt.Errorf("WaitContainier: error status code %d", resp.StatusCode)
+	}
+	return nil
+}

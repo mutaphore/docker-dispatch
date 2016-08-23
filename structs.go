@@ -87,6 +87,7 @@ type Options struct {
 	Time       int
 	Volumes    bool
 	Force      bool
+	Remove     bool
 }
 
 type Result struct {

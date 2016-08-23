@@ -64,7 +64,7 @@ func main() {
 	FailOnError(err, fmt.Sprintf("Error connecting to queue at %s\n", queueAddr))
 	queueOutput, err := qreader.Consume(queue)
 	FailOnError(err, fmt.Sprintf("Error reading from queue '%s'\n", queue))
-	fmt.Printf("Connected to queue %s at %s\n", queue, queueAddr)
+	fmt.Printf("Connected to queue \"%s\" at %s\n", queue, queueAddr)
 
 	// Create message parser
 	parserOutput := NewMessageParser(queueOutput)
@@ -76,6 +76,6 @@ func main() {
 
 	// Output results data
 	for r := range dispOutput {
-		fmt.Printf("%s | %v\n", r.Name, r.Data)
+		fmt.Printf("%s | %v", r.Name, r.Data)
 	}
 }

@@ -88,6 +88,20 @@ func (d *Dispatcher) run(m Message) {
 		// TODO: remove attached loop
 		return
 	}
+
+	// 4. Wait for container to finish and remove it
+	if m.Options.Remove {
+		err = d.client.WaitContainer(container.Id)
+		if err != nil {
+			d.outbound <- Result{Id: container.Id, Name: name, Data: fmt.Sprintf("Error: %s", err.Error())}
+			return
+		}
+		err = d.client.RemoveContainer(container.Id, m.Options.Volumes, m.Options.Force)
+		if err != nil {
+			d.outbound <- Result{Id: container.Id, Name: name, Data: fmt.Sprintf("Error: %s", err.Error())}
+			return
+		}
+	}
 }
 
 // Dispatch a stop container command
