@@ -4,7 +4,7 @@
 
 Docker dispatch listens for properly formatted messages from RabbitMQ and creates/runs containers from pre-built images in Docker. It talks to the Docker daemon via its RESTful API and delivers responses in stdout.
 
-[architecture diagram](res/docker-dispatch-architecture.png)
+![architecture](res/docker-dispatch-architecture.png)
 
 ## Installation
 
