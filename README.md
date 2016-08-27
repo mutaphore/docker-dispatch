@@ -1,13 +1,10 @@
 # Docker Dispatch
-WARNING: This repo is still being worked on! A service that dispatches Docker containers from RabbitMQ messages.
-
 
 ## Architecture
 
 Docker dispatch listens for properly formatted messages from RabbitMQ and creates/runs containers from pre-built images in Docker. It talks to the Docker daemon via its RESTful API and delivers responses in stdout.
-```
-rabbitmq ----(message)----> docker-dispatch <----(REST Api)----> dockerd
-```
+
+[architecture diagram](res/docker-dispatch-architecture.png)
 
 ## Installation
 
