@@ -1,5 +1,8 @@
 # Docker Dispatch
 
+## Why?
+
+
 ## Architecture
 
 Docker dispatch listens for properly formatted messages from RabbitMQ and creates/runs containers from pre-built images in Docker. It talks to the Docker daemon via its RESTful API and delivers responses in stdout.
@@ -32,16 +35,16 @@ For more information on how to setup Docker to bind to different addresses see [
 
 ## Messages formats
 
-Docker dispatcher accepts JSON messages similar to the command that you would give directly to the docker daemon. Note that all key values are capitalized.
+Docker dispatcher accepts JSON messages similar to the CLI command that you would give to the docker daemon. **Note: all JSON keys are capitalized**.
 
-### Running a container from an image (docker run)
+### Running a container from an image (`docker run`)
 
-* Dockercmd - docker command to execute. Currently supports run, stop and remove.
-* Options - options to pass into the docker command.
-** Name - name of container
-** Entrypoint - command to execute in container
-** Attach - array of strings selected from "STDIN", "STDOUT", "STDERR"
-** Remove - boolean, whether or not to remove container after exit
+* Dockercmd - docker command to execute: "run"
+* Options - object containing options to pass into the docker command.
+  * Name - name of container
+  * Entrypoint - command to execute in container
+  * Attach - attach to container file descriptors that is an array of strings selected from "STDIN", "STDOUT", "STDERR"
+  * Remove - automatically remove the container when it exits
 * Image - image name to create container from
 * Cmd - exec form of command to run in container having format ["executable","param1","param2"]
 
@@ -59,13 +62,36 @@ Docker dispatcher accepts JSON messages similar to the command that you would gi
 }
 ```
 
-### Removing a container
+### Stopping a container (`docker stop`)
 
+* Dockercmd - docker command to execute: "stop"
+* Options - object containing options to pass into the docker command.
+  * Time - seconds to wait for stop before killing it (default 10)
+* Container - name or id of container to remove
+
+#### Example
+```javascript
+{
+  Dockercmd: "stop",
+  Options: {
+    Time: 5
+  },
+  Container: "hello_world"
+}
+```
+
+### Removing a container (`docker rm`)
+
+* Dockercmd - docker command to execute: "remove"
+* Options - object containing options to pass into the docker command.
+  * Volumes - remove the volumes associated with the container
+  * Force - force the removal of a running container (uses SIGKILL)
+* Container - name or id of container to remove
+
+#### Example
 ```javascript
 {
   Dockercmd: "remove",
-  Options: {
-    Container: "hello_world"
-  }
+  Container: "hello_world"
 }
 ```

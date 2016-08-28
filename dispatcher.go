@@ -57,6 +57,7 @@ func (d *Dispatcher) run(m Message) {
 		AttachStdin:  stdin,
 		AttachStderr: stderr,
 		AttachStdout: stdout,
+		Entrypoint:   m.Options.Entrypoint,
 		Image:        m.Image,
 		Cmd:          m.Cmd,
 	}
