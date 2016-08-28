@@ -30,9 +30,42 @@ Example:
 For more information on how to setup Docker to bind to different addresses see [here](https://docs.docker.com/engine/reference/commandline/dockerd/#bind-docker-to-another-host-port-or-a-unix-socket).
 
 
-## Options
+## Messages formats
+
+Docker dispatcher accepts JSON messages similar to the command that you would give directly to the docker daemon. Note that all key values are capitalized.
+
+### Running a container from an image (docker run)
+
+* Dockercmd - docker command to execute. Currently supports run, stop and remove.
+* Options - options to pass into the docker command.
+** Name - name of container
+** Entrypoint - command to execute in container
+** Attach - array of strings selected from "STDIN", "STDOUT", "STDERR"
+** Remove - boolean, whether or not to remove container after exit
+* Image - image name to create container from
+* Cmd - exec form of command to run in container having format ["executable","param1","param2"]
+
+#### Example
+```javascript
+{
+  Dockercmd: "run",
+  Options: {
+    Name: "hello_world",
+    Attach: ["STDOUT", "STDERR"],
+    Remove: true
+  },
+  Image: "debian:jessie"
+  Cmd: ["echo", "hello world!"]
+}
 ```
-Options:
--q, queue name
--v, verbose
+
+### Removing a container
+
+```javascript
+{
+  Dockercmd: "remove",
+  Options: {
+    Container: "hello_world"
+  }
+}
 ```
