@@ -30,7 +30,7 @@ func main() {
 	FailOnError(err, "Failed to open a channel")
 
 	// run containers
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		runStr := `{
 			"Dockercmd": "run",
 			"Options": {

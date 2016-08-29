@@ -2,12 +2,16 @@
 
 ## Why?
 
+Some applications have a need to create a collection of containers via a reliable stream of queued messages.
 
 ## Architecture
 
 Docker dispatch listens for properly formatted messages from RabbitMQ and creates/runs containers from pre-built images in Docker. It talks to the Docker daemon via its RESTful API and delivers responses in stdout.
 
 ![architecture](res/docker-dispatch-architecture.png)
+
+## Demo
+![demo](res/tty.gif)
 
 ## Installation
 
@@ -33,7 +37,7 @@ Example:
 For more information on how to setup Docker to bind to different addresses see [here](https://docs.docker.com/engine/reference/commandline/dockerd/#bind-docker-to-another-host-port-or-a-unix-socket).
 
 
-## Messages formats
+## Message formats
 
 Docker dispatcher accepts JSON messages similar to the CLI command that you would give to the docker daemon. **Note: all JSON keys are capitalized**.
 

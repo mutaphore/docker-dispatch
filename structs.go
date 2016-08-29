@@ -82,7 +82,7 @@ type Message struct {
 
 type Options struct {
 	Attach     []string
-	Entrypoint string
+	Entrypoint []string
 	Name       string
 	Time       int
 	Volumes    bool
