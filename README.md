@@ -13,12 +13,20 @@ Docker dispatch listens for properly formatted messages from RabbitMQ and create
 ## Demo
 ![demo](res/tty.gif)
 
-## Installation
+## Install
 
-With go: `go get github.com/mutaphore/docker-dispatch`
+Fetch repository: 
+```
+$ go get github.com/mutaphore/docker-dispatch
+```
 
+Build: 
+```
+$ cd $GOPATH/github.com/mutaphore/docker-dispatch
+$ go build
+```
 
-## Running
+## Run
 
 To run the dispatcher service: 
 ```
